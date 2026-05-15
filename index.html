@@ -1,0 +1,971 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>아크 바이스(ARK-VICE)</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet"><style>
+:root{
+  --bg:#f4f2fb;--sidebar-bg:#16102a;--sidebar-text:#b8a8e0;--sidebar-hover:rgba(130,70,255,.15);--sidebar-active:rgba(130,70,255,.28);--sidebar-border:rgba(130,70,255,.18);
+  --canvas-bg:#fff;--canvas-border:#e4ddf8;--text-primary:#1a1030;--text-secondary:#6b5a8e;
+  --accent:#7c3aed;--accent-light:rgba(124,58,237,.09);
+  --toolbar-bg:#fff;--toolbar-border:#e4ddf8;--btn-bg:#f3f0ff;--btn-hover:#e9e3ff;
+  --section-border:#e4ddf8;--input-bg:#f8f6ff;--input-border:#d4c9f5;
+  --card-bg:#f8f6ff;--shadow:0 2px 16px rgba(124,58,237,.08);--modal-bg:rgba(0,0,0,.45);
+  --hero-bg-from:#1a0a2e;--hero-bg-to:#0a1a2e;
+}
+.dark{
+  --bg:#0c0b18;--sidebar-bg:#09080f;--sidebar-text:#a090cc;--sidebar-hover:rgba(130,70,255,.12);--sidebar-active:rgba(130,70,255,.24);--sidebar-border:rgba(130,70,255,.14);
+  --canvas-bg:#120f20;--canvas-border:#261e42;--text-primary:#e8e0ff;--text-secondary:#8878b0;
+  --accent:#a78bfa;--accent-light:rgba(167,139,250,.1);
+  --toolbar-bg:#18142a;--toolbar-border:#261e42;--btn-bg:#1e1838;--btn-hover:#2a2248;
+  --section-border:#261e42;--input-bg:#1a1530;--input-border:#3a2a60;
+  --card-bg:#1a1530;--shadow:0 2px 16px rgba(0,0,0,.35);--modal-bg:rgba(0,0,0,.7);
+  --hero-bg-from:#0a0514;--hero-bg-to:#050d14;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-primary);display:flex;height:100vh;overflow:hidden;transition:background .3s,color .3s;}
+.sidebar{width:210px;background:var(--sidebar-bg);display:flex;flex-direction:column;border-right:1px solid var(--sidebar-border);flex-shrink:0;}
+.sidebar-logo{padding:16px 14px 10px;border-bottom:1px solid var(--sidebar-border);}
+.sidebar-logo .lt{font-size:13px;font-weight:600;color:#c084fc;letter-spacing:.05em;}
+.sidebar-logo .ls{font-size:10px;color:var(--sidebar-text);opacity:.6;margin-top:2px;}
+.slabel{font-size:10px;color:var(--sidebar-text);opacity:.45;padding:12px 14px 5px;letter-spacing:.08em;text-transform:uppercase;}
+.menu-list{list-style:none;flex:1;overflow-y:auto;padding:0 7px;}
+.mi{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--sidebar-text);transition:background .15s;margin-bottom:2px;min-height:32px;}
+.mi:hover{background:var(--sidebar-hover);}
+.mi.active{background:var(--sidebar-active);color:#c084fc;}
+.mi .ico{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.mi .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;}
+.mi .lbl-input{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(180,120,255,.4);border-radius:4px;color:var(--sidebar-text);font-size:12px;padding:2px 5px;outline:none;min-width:0;}
+.mi .mi-actions{display:none;gap:3px;flex-shrink:0;}
+.mi:hover .mi-actions,.mi.active .mi-actions{display:flex;}
+.mi-btn{width:20px;height:20px;border-radius:4px;border:none;background:transparent;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--sidebar-text);opacity:.6;transition:opacity .15s,background .15s;}
+.mi-btn:hover{opacity:1;background:rgba(255,255,255,.1);}
+.mi-btn.del-btn:hover{color:#f87171;}
+.mi-btn.edit-btn:hover{color:#a78bfa;}
+.add-menu-btn{margin:7px;padding:7px;background:rgba(124,58,237,.1);border:1px dashed rgba(124,58,237,.3);border-radius:8px;color:#a78bfa;font-size:12px;cursor:pointer;text-align:center;transition:background .15s;}
+.add-menu-btn:hover{background:rgba(124,58,237,.2);}
+.sidebar-bottom{padding:10px 7px;border-top:1px solid var(--sidebar-border);display:flex;flex-direction:column;gap:4px;}
+.theme-tog{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--sidebar-text);transition:background .15s;}
+.theme-tog:hover{background:var(--sidebar-hover);}
+.theme-color-btn{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--sidebar-text);transition:background .15s;}
+.theme-color-btn:hover{background:var(--sidebar-hover);}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.toolbar{background:var(--toolbar-bg);border-bottom:1px solid var(--toolbar-border);padding:5px 12px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:44px;}
+.tsep{width:1px;height:18px;background:var(--toolbar-border);margin:0 3px;}
+.tbtn{padding:4px 8px;background:var(--btn-bg);border:1px solid var(--toolbar-border);border-radius:6px;cursor:pointer;font-size:12px;color:var(--text-primary);transition:background .15s;white-space:nowrap;line-height:1.4;}
+.tbtn:hover{background:var(--btn-hover);}
+.tsel{padding:4px 6px;background:var(--btn-bg);border:1px solid var(--toolbar-border);border-radius:6px;font-size:12px;color:var(--text-primary);cursor:pointer;}
+.tsel:focus{outline:none;border-color:var(--accent);}
+.cpick{width:26px;height:26px;border-radius:6px;border:1px solid var(--toolbar-border);cursor:pointer;padding:2px;background:var(--btn-bg);}
+.tlbl{font-size:10px;color:var(--text-secondary);white-space:nowrap;}
+.tr{margin-left:auto;display:flex;gap:5px;align-items:center;}
+.expbtn{padding:5px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap;}
+.expbtn:hover{opacity:.85;}
+.canvas-area{flex:1;overflow-y:auto;padding:28px 40px;background:var(--bg);}
+.doc-canvas{max-width:820px;margin:0 auto;background:var(--canvas-bg);border:1px solid var(--canvas-border);border-radius:12px;min-height:600px;padding:44px 52px;box-shadow:var(--shadow);}
+.sblock{margin-bottom:26px;position:relative;}
+.sblock:hover .bacts{opacity:1;}
+.bacts{position:absolute;right:-38px;top:0;display:flex;flex-direction:column;gap:3px;opacity:0;transition:opacity .15s;}
+.bact{width:26px;height:26px;border-radius:6px;border:1px solid var(--section-border);background:var(--canvas-bg);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:background .15s;}
+.bact:hover{background:var(--btn-hover);color:var(--text-primary);}
+[contenteditable]{outline:none;}
+[contenteditable]:focus{background:var(--accent-light);border-radius:3px;}
+[contenteditable]:empty:before{content:attr(data-ph);color:var(--text-secondary);opacity:.4;font-style:italic;pointer-events:none;}
+.doc-hero{background:linear-gradient(135deg,var(--hero-bg-from) 0%,var(--hero-bg-to) 100%);border-radius:10px;padding:38px 32px;margin-bottom:28px;text-align:center;transition:background .3s;}
+.hero-badge{display:inline-block;background:rgba(180,120,255,.2);border:1px solid rgba(180,120,255,.4);color:#c9a0ff;font-size:11px;padding:3px 12px;border-radius:20px;margin-bottom:10px;}
+.hero-h1{font-size:26px;font-weight:700;color:#f0e8ff;line-height:1.3;margin-bottom:7px;}
+.hero-sub{font-size:13px;color:rgba(200,180,240,.65);margin-bottom:14px;}
+.hero-meta{display:flex;justify-content:center;gap:18px;font-size:12px;color:rgba(200,180,240,.5);flex-wrap:wrap;}
+.sec-tag{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);padding-left:9px;border-left:3px solid var(--accent);margin-bottom:12px;}
+.text-block{font-size:14px;line-height:1.85;color:var(--text-primary);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.kpi-card{background:var(--card-bg);border:1px solid var(--section-border);border-radius:8px;padding:13px;text-align:center;}
+.kpi-num{font-size:24px;font-weight:700;color:var(--accent);display:block;}
+.kpi-lbl{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+
+/* ── TABLE + 편집 UI ── */
+.table-wrap{overflow-x:auto;position:relative;}
+table.rtbl{width:100%;border-collapse:collapse;font-size:13px;}
+table.rtbl th{background:var(--card-bg);color:var(--text-secondary);font-weight:600;font-size:11px;padding:8px 11px;border:1px solid var(--section-border);text-align:left;position:relative;}
+table.rtbl td{padding:8px 11px;border:1px solid var(--section-border);color:var(--text-primary);vertical-align:top;position:relative;}
+table.rtbl tr:hover td{background:var(--accent-light);}
+
+/* 열 삭제 버튼 (헤더 hover 시) */
+.col-del{
+  display:none;position:absolute;top:2px;right:2px;
+  width:16px;height:16px;border-radius:50%;
+  background:#ef4444;color:#fff;font-size:9px;line-height:16px;text-align:center;
+  cursor:pointer;z-index:5;
+}
+table.rtbl th:hover .col-del{display:block;}
+
+/* 행 삭제 버튼 (td hover 시, 첫 번째 td에만) */
+.row-del{
+  display:none;position:absolute;top:50%;left:-20px;transform:translateY(-50%);
+  width:16px;height:16px;border-radius:50%;
+  background:#ef4444;color:#fff;font-size:9px;line-height:16px;text-align:center;
+  cursor:pointer;z-index:5;
+}
+table.rtbl tr:hover .row-del{display:block;}
+
+/* 표 하단/우측 추가 버튼 */
+.tbl-add-row-btn,.tbl-add-col-btn{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:5px 10px;border:1px dashed var(--section-border);border-radius:6px;
+  font-size:11px;color:var(--text-secondary);cursor:pointer;
+  background:var(--btn-bg);transition:background .15s,border-color .15s;
+  white-space:nowrap;
+}
+.tbl-add-row-btn:hover,.tbl-add-col-btn:hover{background:var(--btn-hover);border-color:var(--accent);color:var(--text-primary);}
+.tbl-controls{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap;}
+
+.tl-wrap{padding-left:18px;border-left:2px solid var(--accent);}
+.tl-item{margin-bottom:14px;}
+.tl-week{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:1px;}
+.tl-title{font-size:14px;font-weight:600;color:var(--text-primary);}
+.tl-desc{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.risk-card{background:var(--card-bg);border-radius:8px;padding:13px;border:1px solid var(--section-border);}
+.risk-ttl{font-size:12px;font-weight:700;margin-bottom:8px;}
+.risk-ttl.g{color:#22c55e;}.risk-ttl.r{color:#ef4444;}
+.risk-li{font-size:12px;color:var(--text-secondary);padding:4px 0;border-bottom:1px solid var(--section-border);}
+.risk-li:last-child{border-bottom:none;}
+.next-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.next-card{background:var(--card-bg);border:1px solid var(--section-border);border-radius:8px;padding:11px;}
+.next-role{font-size:10px;color:var(--accent);font-weight:600;margin-bottom:2px;}
+.next-name{font-size:13px;font-weight:600;color:var(--text-primary);}
+.next-task{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+.callout{display:flex;gap:12px;padding:14px 16px;border-radius:10px;border-left:4px solid var(--accent);background:var(--accent-light);}
+.callout-icon{font-size:20px;flex-shrink:0;}.callout-body{flex:1;}
+.callout-title{font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;}
+.callout-text{font-size:13px;color:var(--text-secondary);line-height:1.7;}
+.callout.info{border-color:#3b82f6;background:rgba(59,130,246,.08);}
+.callout.warn{border-color:#f59e0b;background:rgba(245,158,11,.08);}
+.callout.danger{border-color:#ef4444;background:rgba(239,68,68,.08);}
+.callout.success{border-color:#22c55e;background:rgba(34,197,94,.08);}
+.blockquote{border-left:4px solid var(--accent);padding:12px 16px;background:var(--card-bg);border-radius:0 8px 8px 0;font-size:15px;font-style:italic;color:var(--text-secondary);line-height:1.7;}
+.divider{border:none;border-top:2px solid var(--section-border);margin:8px 0;}
+.divider.dashed{border-style:dashed;}.divider.thick{border-width:4px;border-color:var(--accent);}
+.img-block{background:var(--card-bg);border:2px dashed var(--section-border);border-radius:10px;padding:32px;text-align:center;color:var(--text-secondary);font-size:13px;cursor:pointer;transition:border-color .15s;}
+.img-block:hover{border-color:var(--accent);}
+.img-block img{max-width:100%;border-radius:8px;margin-top:10px;}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+.badge.purple{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
+.badge.blue{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);}
+.badge.green{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3);}
+.badge.red{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+.badge.gray{background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.3);}
+.prog-item{margin-bottom:12px;}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:4px;}
+.prog-bar{height:8px;background:var(--section-border);border-radius:20px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#c084fc);border-radius:20px;transition:width .4s;}
+.step-list{display:flex;flex-direction:column;gap:10px;}
+.step-item{display:flex;gap:12px;align-items:flex-start;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-title{font-size:13px;font-weight:600;color:var(--text-primary);}
+.step-desc{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.add-block-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px dashed var(--section-border);}
+.abtn{padding:5px 10px;background:var(--btn-bg);border:1px dashed var(--section-border);border-radius:7px;font-size:11px;color:var(--text-secondary);cursor:pointer;transition:background .15s;}
+.abtn:hover{background:var(--btn-hover);color:var(--text-primary);border-color:var(--accent);}
+.html-embed-wrap{width:100%;border:1px solid var(--section-border);border-radius:8px;overflow:hidden;background:var(--card-bg);}
+.html-embed-wrap iframe{width:100%;border:none;display:block;}
+.html-embed-toolbar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card-bg);border-bottom:1px solid var(--section-border);font-size:11px;color:var(--text-secondary);}
+.html-embed-toolbar span{flex:1;}
+.html-embed-drop{border:2px dashed var(--section-border);border-radius:8px;padding:28px;text-align:center;color:var(--text-secondary);font-size:13px;cursor:pointer;transition:border-color .15s,background .15s;}
+.html-embed-drop:hover,.html-embed-drop.drag-over{border-color:var(--accent);background:var(--accent-light);}
+.html-embed-drop input[type=file]{display:none;}
+.fc-wrap{overflow:auto;padding:12px 4px;}
+.fc-grid{display:grid;gap:0;width:max-content;margin:0 auto;}
+.fc-cell{display:flex;align-items:center;justify-content:center;position:relative;}
+.fc-node{background:var(--card-bg);border:2px solid var(--accent);border-radius:8px;padding:9px 14px;font-size:13px;font-weight:500;color:var(--text-primary);text-align:center;min-width:110px;max-width:160px;word-break:keep-all;cursor:default;position:relative;z-index:1;}
+.fc-node.start{background:var(--accent);color:#fff;border-color:var(--accent);border-radius:28px;}
+.fc-node.end{background:#1d4ed8;color:#fff;border-color:#1d4ed8;border-radius:28px;}
+.fc-node.rounded{border-radius:28px;}.fc-node.rect{border-radius:4px;}
+.fc-node.diamond{transform:rotate(45deg);border-radius:4px;min-width:76px;max-width:76px;min-height:76px;display:flex;align-items:center;justify-content:center;padding:0;}
+.fc-node.diamond .fc-inner{transform:rotate(-45deg);display:block;white-space:nowrap;font-size:12px;padding:4px;}
+.fc-arr{display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:18px;line-height:1;pointer-events:none;}
+.fc-arr.v{width:100%;min-height:32px;}.fc-arr.h{min-width:32px;height:100%;}
+.fc-node-overlay{position:absolute;inset:0;display:none;z-index:10;pointer-events:none;}
+.fc-cell:hover .fc-node-overlay{display:block;}
+.fc-cell:focus-within .fc-node-overlay{display:none!important;}
+.fc-add-btn,.fc-del-btn{pointer-events:all;}
+.fc-add-btn{position:absolute;width:20px;height:20px;background:var(--accent);color:#fff;border-radius:50%;font-size:13px;font-weight:700;line-height:20px;text-align:center;cursor:pointer;opacity:.85;z-index:12;user-select:none;}
+.fc-add-btn.top{top:-10px;left:50%;transform:translateX(-50%);}
+.fc-add-btn.bottom{bottom:-10px;left:50%;transform:translateX(-50%);}
+.fc-add-btn.left{left:-10px;top:50%;transform:translateY(-50%);}
+.fc-add-btn.right{right:-10px;top:50%;transform:translateY(-50%);}
+.fc-del-btn{position:absolute;top:-8px;right:-8px;width:18px;height:18px;background:#ef4444;color:#fff;border-radius:50%;font-size:10px;line-height:18px;text-align:center;cursor:pointer;z-index:13;}
+.fc-type-popup{position:fixed;background:var(--canvas-bg);border:1px solid var(--canvas-border);border-radius:10px;padding:10px;display:flex;gap:7px;flex-wrap:wrap;box-shadow:var(--shadow);z-index:9999;width:220px;}
+.fc-type-btn{padding:5px 10px;background:var(--btn-bg);border:1px solid var(--section-border);border-radius:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;transition:background .15s;white-space:nowrap;}
+.fc-type-btn:hover{background:var(--btn-hover);color:var(--text-primary);border-color:var(--accent);}
+.sym-modal{position:fixed;inset:0;background:var(--modal-bg);z-index:200;display:flex;align-items:center;justify-content:center;}
+.sym-box{background:var(--canvas-bg);border:1px solid var(--canvas-border);border-radius:12px;padding:18px;width:420px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow);}
+.sym-box h4{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text-primary);}
+.sym-btn{width:34px;height:34px;border:1px solid var(--section-border);border-radius:6px;background:var(--card-bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.sym-btn:hover{background:var(--btn-hover);border-color:var(--accent);}
+.modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--canvas-bg);border:1px solid var(--canvas-border);border-radius:12px;padding:22px;width:420px;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text-primary);}
+.modal input,.modal select{width:100%;padding:7px 10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:7px;font-size:12px;color:var(--text-primary);margin-bottom:8px;font-family:inherit;}
+.mbtn-row{display:flex;gap:7px;justify-content:flex-end;margin-top:6px;}
+.mbtn-row button{padding:6px 16px;border-radius:7px;font-size:12px;cursor:pointer;border:1px solid var(--input-border);}
+.mbtn-row .ok{background:var(--accent);color:#fff;border-color:var(--accent);}
+.mbtn-row .no{background:var(--btn-bg);color:var(--text-primary);}
+.pub-option{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--section-border);border-radius:9px;cursor:pointer;transition:background .15s;margin-bottom:8px;}
+.pub-option:hover{background:var(--accent-light);border-color:var(--accent);}
+.pub-ico{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
+.pub-info{flex:1;}.pub-ttl{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:1px;}
+.pub-desc{font-size:11px;color:var(--text-secondary);}
+.doc-footer{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:36px;padding-top:18px;border-top:1px solid var(--section-border);}
+.hidden{display:none!important;}
+.color-modal{position:fixed;inset:0;background:var(--modal-bg);z-index:300;display:flex;align-items:center;justify-content:center;}
+.color-box{background:var(--canvas-bg);border:1px solid var(--canvas-border);border-radius:14px;padding:24px;width:400px;box-shadow:var(--shadow);}
+.color-box h3{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--text-primary);}
+.color-preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.color-preset{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0;}
+.color-preset:hover{transform:scale(1.15);}
+.color-preset.active{border-color:var(--text-primary);}
+.color-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.color-row label{font-size:12px;color:var(--text-secondary);width:90px;flex-shrink:0;}
+.color-row input[type=color]{width:36px;height:28px;border:1px solid var(--input-border);border-radius:6px;cursor:pointer;padding:2px;background:var(--btn-bg);}
+.color-row span{font-size:11px;color:var(--text-secondary);}
+.bacts,.add-block-row,.add-menu-btn,.toolbar,.sidebar,.fc-node-overlay,.abtn,.mi-actions,.html-embed-toolbar button,.tbl-controls,.col-del,.row-del{display:none!important}[contenteditable]{outline:none!important;cursor:default!important;}[contenteditable]:focus{background:none!important;}body{overflow:auto!important;height:auto!important;}.main,.canvas-area{overflow:visible!important;}.page-content{display:block!important;}</style></head><body class=""><div style=""><div style="max-width:860px;margin:0 auto;padding:32px 20px;"><div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;"><span style="font-size:11px;color:#9080b8;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);padding:4px 12px;border-radius:20px;">읽기 전용</span><button onclick="window.print()" style="padding:5px 14px;background:#7c3aed;color:#fff;border:none;border-radius:7px;font-size:12px;cursor:pointer;">🖨 인쇄/PDF</button></div><div class="doc-canvas" id="docCanvas">
+      <div class="doc-hero">
+        <div class="hero-badge" data-ph="배지">이벤트 기획 보고서 v1.0</div>
+        <div class="hero-h1" data-ph="제목"><font face="Jua, sans-serif" style="font-weight:normal;">아크 바이스(ARK-VICE)</font></div>
+        <div class="hero-sub" data-ph="부제목"><font face="Jua, sans-serif">「웹 기반 다마고치 미니게임 이벤트」<br>이벤트 기간 : 2026.8.19(수) 정기 점검 후 ~ 2026.10.28(수) 정기 점검 전 (10주)</font></div>
+        <div class="hero-meta">
+          <span><font face="Jua, sans-serif">기획자: 최주호B</font></span>
+          <span><font face="Jua, sans-serif">작성일: 2026.05.13</font></span>
+          <span><font face="Jua, sans-serif">대상: 팀 내부 공유</font></span>
+        </div>
+      </div>
+      <div id="page-overview" class="page-content">
+        <div class="sblock" id="b202">
+          
+          <div class="sec-tag"><b style="color:rgb(20,83,45);font-size:16px;letter-spacing:normal;text-transform:none;">핵심 컨셉</b></div>
+          <div class="text-block" data-ph="내용을 입력하세요..."><i><b>"매일 접속해서 캐릭터를 육성한다."</b></i><br><br>유저의 애정과 선택이 반영된 극강의 귀여운 캐릭터를 육성하며, 하루 3번의 밀도 높은 교감으로 성장과 관계 중심의 재미를 선사하는 10주간의 <b>관계중심형 인터랙션</b> 이벤트.</div>
+        </div>
+        <div class="sblock" id="b206">
+          
+          <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;"><button class="abtn">— 실선</button><button class="abtn">-- 점선</button><button class="abtn">━ 굵은선</button></div>
+          <hr class="divider">
+        </div><div class="sblock" id="b204">
+          
+          <div class="sec-tag"><b style="color:rgb(20,83,45);font-size:16px;letter-spacing:normal;text-transform:none;">이벤트 개요</b></div>
+          <div class="fc-wrap"><div class="fc-grid" id="fcg-b204" style="grid-template-columns: auto 40px auto; grid-template-rows: auto 40px auto 40px auto 40px auto 40px auto 40px auto 40px auto;"><div class="fc-cell" style="grid-area: 1 / 1;"><div class="fc-node start">게임 접속</div></div><div class="fc-cell" style="grid-area: 1 / 2;"></div><div class="fc-cell" style="grid-area: 1 / 3;"></div><div class="fc-cell fc-arr v" style="grid-area: 2 / 1;">↓</div><div class="fc-cell" style="grid-area: 2 / 2;"></div><div class="fc-cell" style="grid-area: 2 / 3;"></div><div class="fc-cell" style="grid-area: 3 / 1;"><div class="fc-node rounded">일일 미션 수행</div></div><div class="fc-cell" style="grid-area: 3 / 2;"></div><div class="fc-cell" style="grid-area: 3 / 3;"></div><div class="fc-cell fc-arr v" style="grid-area: 4 / 1;">↓</div><div class="fc-cell" style="grid-area: 4 / 2;"></div><div class="fc-cell" style="grid-area: 4 / 3;"></div><div class="fc-cell" style="grid-area: 5 / 1;"><div class="fc-node rounded">행동 포인트(AP) 획득</div></div><div class="fc-cell" style="grid-area: 5 / 2;"></div><div class="fc-cell" style="grid-area: 5 / 3;"></div><div class="fc-cell fc-arr v" style="grid-area: 6 / 1;">↓</div><div class="fc-cell" style="grid-area: 6 / 2;"></div><div class="fc-cell" style="grid-area: 6 / 3;"></div><div class="fc-cell" style="grid-area: 7 / 1;"><div class="fc-node rounded">모코콩 상호작용</div></div><div class="fc-cell fc-arr h" style="grid-area: 7 / 2;">→</div><div class="fc-cell" style="grid-area: 7 / 3;"><div class="fc-node rect">식사, 놀이, 탐험</div></div><div class="fc-cell fc-arr v" style="grid-area: 8 / 1;">↓</div><div class="fc-cell" style="grid-area: 8 / 2;"></div><div class="fc-cell" style="grid-area: 8 / 3;"></div><div class="fc-cell" style="grid-area: 9 / 1;"><div class="fc-node rounded">상태 변화 및 성장</div></div><div class="fc-cell" style="grid-area: 9 / 2;"></div><div class="fc-cell" style="grid-area: 9 / 3;"></div><div class="fc-cell fc-arr v" style="grid-area: 10 / 1;">↓</div><div class="fc-cell" style="grid-area: 10 / 2;"></div><div class="fc-cell" style="grid-area: 10 / 3;"></div><div class="fc-cell" style="grid-area: 11 / 1;"><div class="fc-node rounded">보상 획득</div></div><div class="fc-cell fc-arr h" style="grid-area: 11 / 2;">→</div><div class="fc-cell" style="grid-area: 11 / 3;"><div class="fc-node rect">일일/누적/탐험 보상</div></div><div class="fc-cell fc-arr v" style="grid-area: 12 / 1;">↓</div><div class="fc-cell" style="grid-area: 12 / 2;"></div><div class="fc-cell" style="grid-area: 12 / 3;"></div><div class="fc-cell" style="grid-area: 13 / 1;"><div class="fc-node end">최종 성장</div></div><div class="fc-cell" style="grid-area: 13 / 2;"></div><div class="fc-cell" style="grid-area: 13 / 3;"></div></div></div>
+        </div>
+        <div class="sblock" id="b219"><div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;"><button class="abtn">— 실선</button><button class="abtn">-- 점선</button><button class="abtn">━ 굵은선</button></div><hr class="divider"></div><div class="sblock" id="b205">
+          
+          <div class="sec-tag"><b style="color:rgb(20,83,45);font-size:16px;letter-spacing:normal;text-transform:none;">이벤트 UI 예시</b></div>
+          <div class="html-embed-wrap"><div class="html-embed-toolbar"><span>📄 tamagotchi.html</span><button class="abtn">↩ 교체</button></div><iframe id="iframe-b205" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ko&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;Tamagotchi&lt;/title&gt;
+&lt;style&gt;
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #e8e4de;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .device-wrapper {
+    position: relative;
+    width: 560px;
+    height: 300px;
+  }
+
+  .device-body {
+    position: absolute;
+    inset: 0;
+    background: #C5DE92;
+    border-radius: 40px;
+    box-shadow:
+      0 0 0 3px #a8c470,
+      0 14px 44px rgba(0,0,0,0.28),
+      inset 0 3px 8px rgba(255,255,255,0.52),
+      inset 0 -4px 10px rgba(0,0,0,0.14);
+  }
+
+  .device-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 40px;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 11px, rgba(0,0,0,0.03) 11px, rgba(0,0,0,0.03) 12px),
+      repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(0,0,0,0.03) 23px, rgba(0,0,0,0.03) 24px);
+    pointer-events: none;
+  }
+
+  .device-face {
+    position: absolute;
+    inset: 12px;
+    background: linear-gradient(160deg, #cfe89e 0%, #b8d47c 60%, #a9c86a 100%);
+    border-radius: 30px;
+    box-shadow:
+      inset 0 2px 5px rgba(255,255,255,0.5),
+      inset 0 -2px 5px rgba(0,0,0,0.1);
+  }
+
+  /* Orange bezel */
+  .screen-bezel {
+    position: absolute;
+    top: 50%;
+    left: 50px;
+    transform: translateY(-50%);
+    width: 350px;
+    height: 226px;
+    background: #E85A10;
+    border-radius: 16px;
+    box-shadow:
+      0 6px 24px rgba(232,90,16,0.55),
+      inset 0 2px 4px rgba(255,255,255,0.25),
+      inset 0 -3px 6px rgba(0,0,0,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* LCD screen */
+  .screen {
+    width: 316px;
+    height: 194px;
+    background: #dcefc4;
+    border-radius: 8px;
+    border: 2px solid #3a5010;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+
+  /* ======= SIDEBAR ======= */
+  .sidebar {
+    width: 66px;
+    height: 100%;
+    background: rgba(40,70,10,0.10);
+    border-right: 1.5px solid rgba(40,70,10,0.14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .menu-item {
+    width: 56px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    position: relative;
+  }
+
+  .menu-item:hover {
+    background: rgba(40,70,10,0.10);
+    transform: scale(1.05);
+  }
+
+  .menu-item.active {
+    background: rgba(40,70,10,0.16);
+  }
+
+  .menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 20%; bottom: 20%;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: rgba(40,70,10,0.5);
+  }
+
+  .menu-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .menu-label {
+    font-size: 7px;
+    font-weight: 900;
+    color: rgba(30,55,8,0.72);
+    letter-spacing: 0.2px;
+    font-family: 'Nunito', sans-serif;
+    white-space: nowrap;
+  }
+
+  .menu-item.active .menu-label {
+    color: rgba(30,55,8,0.95);
+  }
+
+  .menu-divider {
+    width: 38px;
+    height: 1px;
+    background: rgba(40,70,10,0.12);
+    margin: 1px 0;
+  }
+
+  /* ======= MAIN CONTENT ======= */
+  .screen-content {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Clean gradient sky — no dots */
+  .sky-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+      #c8e890 0%,
+      #d8f0a0 40%,
+      #e0f4b0 70%,
+      #c8e080 100%
+    );
+  }
+
+  /* Ground strip */
+  .ground {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 46px;
+    background: linear-gradient(180deg, #7ab830 0%, #6aa020 100%);
+  }
+  .ground::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: #8acc40;
+    border-radius: 0;
+  }
+
+  /* Sun — clean circle */
+  .sun {
+    position: absolute;
+    top: 12px; right: 18px;
+    width: 24px; height: 24px;
+    background: radial-gradient(circle at 40% 40%, #fff8a0, #f0d030);
+    border-radius: 50%;
+    box-shadow: 0 0 16px rgba(240,208,40,0.6);
+  }
+
+  /* Clouds — smooth */
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.7);
+    border-radius: 20px;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+  }
+  .cloud-1 {
+    top: 18px; left: 12px;
+    width: 40px; height: 12px;
+  }
+  .cloud-1::before { width: 18px; height: 18px; top: -10px; left: 6px; }
+  .cloud-1::after  { width: 14px; height: 14px; top: -7px; left: 18px; }
+
+  .cloud-2 {
+    top: 28px; left: 72px;
+    width: 28px; height: 9px;
+  }
+  .cloud-2::before { width: 14px; height: 14px; top: -8px; left: 4px; }
+  .cloud-2::after  { width: 10px; height: 10px; top: -5px; left: 14px; }
+
+  /* Trees — smooth SVG style via CSS */
+  .tree {
+    position: absolute;
+    bottom: 44px;
+  }
+  .tree-trunk {
+    width: 8px; height: 16px;
+    background: linear-gradient(90deg, #7a4820, #a06030);
+    border-radius: 2px;
+    margin: 0 auto;
+  }
+  .tree-top {
+    width: 0; height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-bottom: 28px solid #4a9020;
+    margin: 0 auto -6px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+  }
+  .tree-top2 {
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 22px solid #5aa030;
+    margin: 0 auto -4px;
+  }
+  .tree-l { left: 6px; transform: scale(0.85); transform-origin: bottom left; }
+  .tree-r { right: 6px; transform: scale(0.8); transform-origin: bottom right; }
+
+  /* ======= CHARACTER ======= */
+  .character-wrap {
+    position: absolute;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 104px;
+    animation: float 2.2s ease-in-out infinite;
+    z-index: 5;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%       { transform: translateX(-50%) translateY(-7px); }
+  }
+
+  .char-shadow {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px; height: 10px;
+    background: rgba(40,80,10,0.18);
+    border-radius: 50%;
+    animation: shadow-anim 2.2s ease-in-out infinite;
+    z-index: 4;
+  }
+  @keyframes shadow-anim {
+    0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.18; }
+    50%       { transform: translateX(-50%) scaleX(0.65); opacity: 0.09; }
+  }
+
+  /* ======= RIGHT BUTTONS ======= */
+  .buttons-area {
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #f4f4ec, #d6d6ca);
+    border: none;
+    cursor: pointer;
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.20),
+      inset 0 1px 3px rgba(255,255,255,0.72),
+      inset 0 -1px 3px rgba(0,0,0,0.14);
+    transition: all 0.08s;
+  }
+  .btn:active {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2), inset 0 2px 5px rgba(0,0,0,0.22);
+    transform: translateY(1px);
+  }
+
+  /* Speaker */
+  .speaker {
+    position: absolute;
+    bottom: 18px; left: 28px;
+    display: grid;
+    grid-template-columns: repeat(4, 5px);
+    grid-template-rows: repeat(2, 5px);
+    gap: 4px;
+  }
+  .speaker-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.16);
+  }
+
+  /* Status lights */
+  .status-lights {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 9px;
+  }
+  .status-light {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #8aaa48;
+    box-shadow: 0 0 5px rgba(138,170,72,0.6);
+    animation: blink 2.4s ease-in-out infinite;
+  }
+  .status-light:nth-child(2) { animation-delay: 0.8s; background: #c8e060; }
+  .status-light:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 1; }
+    40% { opacity: 0.2; }
+  }
+
+  .device-label {
+    position: absolute;
+    bottom: 14px; right: 22px;
+    font-size: 7px;
+    letter-spacing: 3px;
+    color: rgba(50,70,20,0.42);
+    font-family: monospace;
+    font-weight: bold;
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div class=&quot;device-wrapper&quot;&gt;
+  &lt;div class=&quot;device-body&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;device-face&quot;&gt;
+
+    &lt;div class=&quot;status-lights&quot;&gt;
+      &lt;div class=&quot;status-light&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;status-light&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;status-light&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;screen-bezel&quot;&gt;
+      &lt;div class=&quot;screen&quot;&gt;
+
+        &lt;!-- SIDEBAR --&gt;
+        &lt;div class=&quot;sidebar&quot;&gt;
+          &lt;div class=&quot;menu-item active&quot; onclick=&quot;setActive(this)&quot;&gt;
+            &lt;div class=&quot;menu-icon&quot;&gt;🍎&lt;/div&gt;
+            &lt;div class=&quot;menu-label&quot;&gt;먹이기&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;menu-divider&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;menu-item&quot; onclick=&quot;setActive(this)&quot;&gt;
+            &lt;div class=&quot;menu-icon&quot;&gt;🎮&lt;/div&gt;
+            &lt;div class=&quot;menu-label&quot;&gt;놀아주기&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;menu-divider&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;menu-item&quot; onclick=&quot;setActive(this)&quot;&gt;
+            &lt;div class=&quot;menu-icon&quot;&gt;🗺️&lt;/div&gt;
+            &lt;div class=&quot;menu-label&quot;&gt;탐험하기&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- MAIN CONTENT --&gt;
+        &lt;div class=&quot;screen-content&quot;&gt;
+          &lt;div class=&quot;sky-bg&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;sun&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;cloud cloud-1&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;cloud cloud-2&quot;&gt;&lt;/div&gt;
+
+          &lt;div class=&quot;tree tree-l&quot;&gt;
+            &lt;div class=&quot;tree-top2&quot;&gt;&lt;/div&gt;
+            &lt;div class=&quot;tree-top&quot;&gt;&lt;/div&gt;
+            &lt;div class=&quot;tree-trunk&quot;&gt;&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;tree tree-r&quot;&gt;
+            &lt;div class=&quot;tree-top2&quot;&gt;&lt;/div&gt;
+            &lt;div class=&quot;tree-top&quot;&gt;&lt;/div&gt;
+            &lt;div class=&quot;tree-trunk&quot;&gt;&lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;!-- Character SVG --&gt;
+          &lt;div class=&quot;character-wrap&quot;&gt;
+            &lt;svg viewBox=&quot;0 0 100 130&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;80&quot; height=&quot;104&quot;&gt;
+              &lt;!-- Leaves --&gt;
+              &lt;ellipse cx=&quot;50&quot; cy=&quot;9&quot; rx=&quot;7&quot; ry=&quot;15&quot; fill=&quot;#3d9e1a&quot;/&gt;
+              &lt;ellipse cx=&quot;36&quot; cy=&quot;14&quot; rx=&quot;7&quot; ry=&quot;13&quot; fill=&quot;#4db020&quot; transform=&quot;rotate(-28 36 14)&quot;/&gt;
+              &lt;ellipse cx=&quot;64&quot; cy=&quot;14&quot; rx=&quot;7&quot; ry=&quot;13&quot; fill=&quot;#4db020&quot; transform=&quot;rotate(28 64 14)&quot;/&gt;
+              &lt;!-- Leaf vein lines --&gt;
+              &lt;line x1=&quot;50&quot; y1=&quot;9&quot; x2=&quot;50&quot; y2=&quot;24&quot; stroke=&quot;#2e8010&quot; stroke-width=&quot;1.2&quot; opacity=&quot;0.45&quot;/&gt;
+              &lt;line x1=&quot;36&quot; y1=&quot;14&quot; x2=&quot;40&quot; y2=&quot;25&quot; stroke=&quot;#2e8010&quot; stroke-width=&quot;1&quot; opacity=&quot;0.35&quot; transform=&quot;rotate(-28 36 14)&quot;/&gt;
+              &lt;line x1=&quot;64&quot; y1=&quot;14&quot; x2=&quot;60&quot; y2=&quot;25&quot; stroke=&quot;#2e8010&quot; stroke-width=&quot;1&quot; opacity=&quot;0.35&quot; transform=&quot;rotate(28 64 14)&quot;/&gt;
+
+              &lt;!-- Head --&gt;
+              &lt;ellipse cx=&quot;50&quot; cy=&quot;47&quot; rx=&quot;28&quot; ry=&quot;27&quot; fill=&quot;#b8d888&quot;/&gt;
+              &lt;!-- Highlight --&gt;
+              &lt;ellipse cx=&quot;40&quot; cy=&quot;37&quot; rx=&quot;11&quot; ry=&quot;9&quot; fill=&quot;rgba(255,255,255,0.22)&quot;/&gt;
+
+              &lt;!-- Eyes --&gt;
+              &lt;ellipse cx=&quot;40&quot; cy=&quot;46&quot; rx=&quot;7.5&quot; ry=&quot;8.5&quot; fill=&quot;#1c1c1c&quot;/&gt;
+              &lt;ellipse cx=&quot;60&quot; cy=&quot;46&quot; rx=&quot;7.5&quot; ry=&quot;8.5&quot; fill=&quot;#1c1c1c&quot;/&gt;
+              &lt;!-- Eye whites/shine --&gt;
+              &lt;ellipse cx=&quot;37.5&quot; cy=&quot;43&quot; rx=&quot;2.8&quot; ry=&quot;2.8&quot; fill=&quot;white&quot;/&gt;
+              &lt;ellipse cx=&quot;57.5&quot; cy=&quot;43&quot; rx=&quot;2.8&quot; ry=&quot;2.8&quot; fill=&quot;white&quot;/&gt;
+              &lt;ellipse cx=&quot;43.5&quot; cy=&quot;49&quot; rx=&quot;1.3&quot; ry=&quot;1.3&quot; fill=&quot;white&quot; opacity=&quot;0.6&quot;/&gt;
+              &lt;ellipse cx=&quot;63.5&quot; cy=&quot;49&quot; rx=&quot;1.3&quot; ry=&quot;1.3&quot; fill=&quot;white&quot; opacity=&quot;0.6&quot;/&gt;
+
+              &lt;!-- Blush --&gt;
+              &lt;ellipse cx=&quot;29&quot; cy=&quot;54&quot; rx=&quot;7.5&quot; ry=&quot;4.5&quot; fill=&quot;#f4a0a8&quot; opacity=&quot;0.55&quot;/&gt;
+              &lt;ellipse cx=&quot;71&quot; cy=&quot;54&quot; rx=&quot;7.5&quot; ry=&quot;4.5&quot; fill=&quot;#f4a0a8&quot; opacity=&quot;0.55&quot;/&gt;
+
+              &lt;!-- Nose --&gt;
+              &lt;ellipse cx=&quot;50&quot; cy=&quot;53&quot; rx=&quot;3&quot; ry=&quot;2&quot; fill=&quot;#1c1c1c&quot; opacity=&quot;0.5&quot;/&gt;
+
+              &lt;!-- Smile --&gt;
+              &lt;path d=&quot;M 43 59 Q 50 66 57 59&quot; stroke=&quot;#1c1c1c&quot; stroke-width=&quot;2&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot; opacity=&quot;0.65&quot;/&gt;
+
+              &lt;!-- Body --&gt;
+              &lt;ellipse cx=&quot;50&quot; cy=&quot;91&quot; rx=&quot;23&quot; ry=&quot;25&quot; fill=&quot;#b8d888&quot;/&gt;
+              &lt;ellipse cx=&quot;42&quot; cy=&quot;81&quot; rx=&quot;10&quot; ry=&quot;8&quot; fill=&quot;rgba(255,255,255,0.14)&quot;/&gt;
+
+              &lt;!-- Arms --&gt;
+              &lt;ellipse cx=&quot;22&quot; cy=&quot;90&quot; rx=&quot;10&quot; ry=&quot;13&quot; fill=&quot;#b0d080&quot; transform=&quot;rotate(-12 22 90)&quot;/&gt;
+              &lt;ellipse cx=&quot;19&quot; cy=&quot;100&quot; rx=&quot;7&quot; ry=&quot;7&quot; fill=&quot;#a8c878&quot;/&gt;
+
+              &lt;ellipse cx=&quot;78&quot; cy=&quot;90&quot; rx=&quot;10&quot; ry=&quot;13&quot; fill=&quot;#b0d080&quot; transform=&quot;rotate(12 78 90)&quot;/&gt;
+              &lt;ellipse cx=&quot;81&quot; cy=&quot;100&quot; rx=&quot;7&quot; ry=&quot;7&quot; fill=&quot;#a8c878&quot;/&gt;
+
+              &lt;!-- Legs --&gt;
+              &lt;ellipse cx=&quot;40&quot; cy=&quot;115&quot; rx=&quot;11&quot; ry=&quot;11&quot; fill=&quot;#a8c878&quot;/&gt;
+              &lt;ellipse cx=&quot;60&quot; cy=&quot;115&quot; rx=&quot;11&quot; ry=&quot;11&quot; fill=&quot;#a8c878&quot;/&gt;
+
+              &lt;!-- Belly sheen --&gt;
+              &lt;ellipse cx=&quot;50&quot; cy=&quot;93&quot; rx=&quot;12&quot; ry=&quot;14&quot; fill=&quot;rgba(255,255,255,0.10)&quot;/&gt;
+            &lt;/svg&gt;
+          &lt;/div&gt;
+
+          &lt;div class=&quot;char-shadow&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;ground&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;buttons-area&quot;&gt;
+      &lt;button class=&quot;btn&quot;&gt;&lt;/button&gt;
+      &lt;button class=&quot;btn&quot;&gt;&lt;/button&gt;
+      &lt;button class=&quot;btn&quot;&gt;&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;speaker&quot;&gt;
+      &lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;&lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;&lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;&lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;&lt;div class=&quot;speaker-dot&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;device-label&quot;&gt;TAMAGOTCHI&lt;/div&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  function setActive(el) {
+    document.querySelectorAll('.menu-item').forEach(i =&gt; i.classList.remove('active'));
+    el.classList.add('active');
+  }
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+" sandbox="allow-scripts allow-same-origin" style="min-height:400px;"></iframe></div>
+        </div>
+        
+        
+        <div class="sblock" id="b220"><div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;"><button class="abtn">— 실선</button><button class="abtn">-- 점선</button><button class="abtn">━ 굵은선</button></div><hr class="divider"></div><div class="sblock" id="b218"><div class="sec-tag"><span style="color: rgb(20, 83, 45); font-size: 16px; letter-spacing: normal; text-transform: none;">시스템 설계</span></div><div class="text-block" data-ph="내용을 입력하세요..."><div>▸총 10주 (70일) / 8주(56일) 참여 시 최종 완료</div><div>▸일일 최대 30 AP 수급</div><div>▸하루 최대 3회 상호작용 가능</div><div>▸하루 3회 행동 완료 시 일일 보상(1회) 지급</div><div>▸주 1~3회 탐험 콘텐츠로 특별 랜덤 보상 지급(대박 감성)</div><div>▸성장 단계별 달성 보상 지급(총 5단계)</div></div></div><div class="sblock" id="b221"><div class="sec-tag"><font color="#14532d"><span style="font-size: 16px; letter-spacing: normal; text-transform: none;">기본 스탯</span></font></div><div id="tw-b221">
+    <div class="table-wrap">
+      <table class="rtbl" id="tbl-b221">
+        <thead><tr>
+    <th>
+      <div style="min-width:40px;"><span style="color: rgb(20, 83, 45); font-size: 14px;"><span style="font-size: 13px;"><span style="font-size: 14px;">스탯 구분</span></span></span></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">초기값</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">변동 인자</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">비고</span></font></div>
+      
+    </th></tr></thead>
+        <tbody>
+    <tr>
+      <td>
+        <div style="min-width:40px;">배부름</div>
+      </td><td>
+        <div style="min-width:40px;"><b>80</b>/100</div>
+      </td><td>
+        <div style="min-width:40px;">[먹이기] / 일 감소</div>
+      </td><td>
+        <div style="min-width:40px;">0이 되면 <b data-path-to-node="4,1,3,0" data-index-in-node="6">체력</b> 감소 속도 2배</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">체력</div>
+      </td><td>
+        <div style="min-width:40px;"><b>100</b>/100</div>
+      </td><td>
+        <div style="min-width:40px;">[놀아주기] / 일 감소</div>
+      </td><td>
+        <div style="min-width:40px;">20 미만 시 <b data-path-to-node="4,2,3,0" data-index-in-node="8">탐험 불가</b>, 상호작용 보정 감소</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">친밀도</div>
+      </td><td>
+        <div style="min-width:40px;"><b>0</b>/4,000</div>
+      </td><td>
+        <div style="min-width:40px;">[먹이기],[놀아주기],[탐험하기]</div>
+      </td><td>
+        <div style="min-width:40px;"><span data-path-to-node="4,3,2,0"></span><span data-path-to-node="4,3,3,0"><b>성장 단계</b>를 결정하는 절대 수치</span></div>
+      </td>
+    </tr></tbody>
+      </table>
+    </div>
+    </div></div><div class="sblock" id="b222"><div class="sec-tag"><font color="#14532d"><span style="font-size: 16px; letter-spacing: normal; text-transform: none;">상호작용별 스탯 밸런스</span></font></div><div id="tw-b222">
+    <div class="table-wrap">
+      <table class="rtbl" id="tbl-b222">
+        <thead><tr>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">상호작용</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">소모 AP</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">배부름</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">체력</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">친밀도</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">비고</span></font></div>
+      
+    </th></tr></thead>
+        <tbody>
+    <tr>
+      <td>
+        <div style="min-width:40px;">먹이기</div>
+      </td><td>
+        <div style="min-width:40px;">5</div>
+      </td><td>
+        <div style="min-width:40px;">+30</div>
+      </td><td>
+        <div style="min-width:40px;">-</div>
+      </td><td>
+        <div style="min-width:40px;">+10</div>
+      </td><td>
+        <div style="min-width:40px;">일 최대 6회 가능</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">놀아주기</div>
+      </td><td>
+        <div style="min-width:40px;">5</div>
+      </td><td>
+        <div style="min-width:40px;">-5</div>
+      </td><td>
+        <div style="min-width:40px;">+30</div>
+      </td><td>
+        <div style="min-width:40px;">+15</div>
+      </td><td>
+        <div style="min-width:40px;">일 최대 6회 가능</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">탐험하기</div>
+      </td><td>
+        <div style="min-width:40px;">20</div>
+      </td><td>
+        <div style="min-width:40px;">-40</div>
+      </td><td>
+        <div style="min-width:40px;">-40</div>
+      </td><td>
+        <div style="min-width:40px;">+60</div>
+      </td><td>
+        <div style="min-width:40px;">주 3회 제한</div>
+      </td>
+    </tr></tbody>
+      </table>
+    </div>
+    </div></div><div class="sblock" id="b225"><div class="callout info"><div class="callout-icon">💡</div><div class="callout-body"><div class="callout-title"><font color="#19191a">진행 시나리오</font></div><div class="callout-text"><div><font color="#666071"><b data-path-to-node="9" data-index-in-node="0">1) 탐험하는 날 (주 3회)<br></b><b data-path-to-node="10,0,0" data-index-in-node="0">액션:</b> <b data-path-to-node="10,0,0" data-index-in-node="4">[탐험하기 1회(20)] + [자유 선택 2회(10)] = 총 30 AP (3회 행동)<br></b><b data-path-to-node="10,1,0" data-index-in-node="0">►</b> 탐험으로 대량의 친밀도(+60)와 <span data-path-to-node="10,1,0" data-index-in-node="23">특별 보상</span>을 챙기는 대신, 캐릭터의 상태 스탯(포만감/체력)이 크게 깎임.<br></font></div><h4 data-path-to-node="11"><font color="#666071"><b data-path-to-node="11" data-index-in-node="0"><br>2) 집중 케어하는 날 (주 4회)<br></b><b data-path-to-node="12,0,0" data-index-in-node="0">액션:</b> <b data-path-to-node="12,0,0" data-index-in-node="4">[먹이기/놀아주기 조합으로 3회] = 총 15 AP (잔여 15 AP)<br></b>► <span style="font-weight: normal;">탐험으로 깎인 스탯을 복구하고 안정적으로 친밀도를 쌓임<br><span data-path-to-node="12,2,0" data-index-in-node="0">특징:</span> AP가 남기 때문에 미션을 전부 수행하지 않아도 일일 보상(3회 행동)을 쉽게 챙길 수 있는 휴식일 개념</span></font></h4></div></div></div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;"><button class="abtn">💙 정보</button><button class="abtn">🟡 경고</button><button class="abtn">🔴 위험</button><button class="abtn">🟢 성공</button></div></div><div class="sblock" id="b226"><div class="sec-tag"><span style="color: rgb(20, 83, 45); font-size: 16px; letter-spacing: normal; text-transform: none;">목표 8주 성장 마일스톤</span></div><div id="tw-b226">
+    <div class="table-wrap">
+      <table class="rtbl" id="tbl-b226">
+        <thead><tr>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">성장 단계</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">누적 친밀도</span></font></div>
+      
+    </th>
+    <th>
+      <div style="min-width:40px;"><font color="#14532d"><span style="font-size: 14px;">예상 달성 시점</span></font></div>
+      
+    </th></tr></thead>
+        <tbody>
+    <tr>
+      <td>
+        <div style="min-width:40px;">1단계</div>
+      </td><td>
+        <div style="min-width:40px;">0</div>
+      </td><td>
+        <div style="min-width:40px;">시작 즉시</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">2단계</div>
+      </td><td>
+        <div style="min-width:40px;">500</div>
+      </td><td>
+        <div style="min-width:40px;">1주차 말</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">3단계</div>
+      </td><td>
+        <div style="min-width:40px;">1,500</div>
+      </td><td>
+        <div style="min-width:40px;">3주차 중반</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">4단계</div>
+      </td><td>
+        <div style="min-width:40px;">2,800</div>
+      </td><td>
+        <div style="min-width:40px;">6주차 초반</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="min-width:40px;">5단계</div>
+      </td><td>
+        <div style="min-width:40px;">4,000</div>
+      </td><td>
+        <div style="min-width:40px;">8주차 (완료)</div>
+      </td>
+    </tr></tbody>
+      </table>
+    </div>
+    </div></div><div class="sblock" id="b227"><div class="callout info"><div class="callout-icon">💡</div><div class="callout-body"><div class="callout-title">관리/예외 처리</div><div class="callout-text"><div>방치 패널티: 24시간 미접속 시 포만감 -48, 체력 -24 감소. (단, 캐릭터는 사라지지 않음)</div><div>복구 메커니즘: 하루만 제대로 관리해도(30 AP 사용) 방치된 스탯의 대부분을 복구할 수 있는 관대한 설계.</div><div>피버 타임: 8주차 이후 성체기를 달성한 유저는 '탐험' 보상 획득 확률이 대폭 상승하여 남은 2주를 보너스 파밍 기간으로 활용.</div></div></div></div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;"><button class="abtn">💙 정보</button><button class="abtn">🟡 경고</button><button class="abtn">🔴 위험</button><button class="abtn">🟢 성공</button></div></div><div class="sblock" id="b229"><div class="callout info"><div class="callout-icon">💡</div><div class="callout-body"><div class="callout-title">보상 구조 추가</div><div class="callout-text">내용을 입력하세요.</div></div></div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;"><button class="abtn">💙 정보</button><button class="abtn">🟡 경고</button><button class="abtn">🔴 위험</button><button class="abtn">🟢 성공</button></div></div>
+      </div>
+      <div class="doc-footer">로스트아크 이벤트 기획팀 · 내부 배포용 · 2026.05.13</div>
+    </div><div style="text-align:center;margin-top:28px;font-size:11px;color:#9080b8;">이 문서는 읽기 전용으로 발행되었습니다.</div></div></div></body></html>
